@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stylety - Plataforma de Descoberta Visual</title>
+  <meta name="description" content="Descubra e organize ideias criativas sobre design, arquitetura, culinária, viagens e muito mais.">
+  <link rel="icon" type="image/png" href="/img/logo.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#e60023">
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Biblioteca de Ícones Vetoriais Lucide -->
+  <script src="/js/lucide.min.js"></script>
+</head>
+<body>
+
+  <!-- Header Superior Estilo Pinterest -->
+  <header class="header" role="banner">
+    <button class="logo-btn" onclick="App.loadFeed('Tudo')" aria-label="Página Inicial do Stylety">
+      <img src="/img/logo.png" alt="Stylety Logo" />
+      <span class="logo-title">Stylety</span>
+    </button>
+
+    <nav class="nav-links" role="navigation" aria-label="Navegação Principal">
+      <button class="nav-btn active" id="navHomeBtn" onclick="App.loadFeed('Tudo')">
+        Início
+      </button>
+      <button class="nav-btn" id="navExploreBtn" onclick="App.openExplore()">
+        Explorar
+      </button>
+      <div style="position: relative;">
+        <button class="nav-btn" onclick="App.toggleCreateMenu()" id="btnCreateNav">
+          Criar <i data-lucide="chevron-down" class="icon-xs"></i>
+        </button>
+        <div class="dropdown-menu" id="createDropdownMenu" style="width: 200px; top: 48px; left: 0;">
+          <button class="dropdown-item" onclick="App.openCreatePinModal()">
+            <i data-lucide="plus-circle" class="icon-sm"></i> Criar Pin
+          </button>
+          <button class="dropdown-item" onclick="App.openCreateBoardModal()">
+            <i data-lucide="folder-plus" class="icon-sm"></i> Criar Pasta
+          </button>
+        </div>
+      </div>
+      <button class="nav-btn" id="navModBtn" style="display: none; color: var(--primary);" onclick="App.openModerationPanel()">
+        <i data-lucide="shield" class="icon-sm"></i> Moderação
+      </button>
+    </nav>
+
+    <!-- Barra de Pesquisa e Stylety Lens (RF004) -->
+    <div class="search-container" role="search">
+      <div class="search-bar">
+        <span class="search-icon" aria-hidden="true">
+          <i data-lucide="search" class="icon-md"></i>
+        </span>
+        <input type="text" id="searchInput" placeholder="Pesquise por ideias, receitas, arquitetura, estilo... (Ctrl+K)" aria-label="Pesquisar ideias" autocomplete="off" />
+        <button class="lens-trigger-btn" onclick="App.openLensModal()" title="Pesquisa Visual (Stylety Lens)" aria-label="Pesquisa Visual Stylety Lens">
+          <i data-lucide="camera" class="icon-sm"></i> Lens
+        </button>
+      </div>
+
+      <!-- Dropdown com Sugestões e Filtros (RF004) -->
+      <div class="search-dropdown" id="searchDropdown">
+        <div class="search-filters-bar">
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); align-self: center;">Filtrar por:</span>
+          <button class="filter-chip active" data-type="todos" onclick="App.setSearchFilter('todos')">Tudo</button>
+          <button class="filter-chip" data-type="pins" onclick="App.setSearchFilter('pins')">Pins</button>
+          <button class="filter-chip" data-type="pastas" onclick="App.setSearchFilter('pastas')">Pastas</button>
+          <button class="filter-chip" data-type="perfis" onclick="App.setSearchFilter('perfis')">Perfis</button>
+        </div>
+        <div id="searchSuggestionsList"></div>
+      </div>
+    </div>
+
+    <!-- Barra de Ações do Usuário e Notificações (RF007, RNF004) -->
+    <div class="header-actions">
+      <!-- Toolbar de Acessibilidade WCAG 2.1 AA -->
+      <button class="icon-btn" onclick="App.toggleHighContrast()" title="Alternar Alto Contraste (WCAG AA)" aria-label="Alternar Alto Contraste">
+        <i data-lucide="contrast" class="icon-md"></i>
+      </button>
+
+      <!-- Notificações (RF007) -->
+      <button class="icon-btn" id="btnNotifications" onclick="App.toggleNotifMenu()" title="Notificações" aria-label="Notificações">
+        <i data-lucide="bell" class="icon-md"></i>
+        <span class="badge" id="notifBadge" style="display: none;">0</span>
+      </button>
+
+      <!-- Mensagens Diretas (RF006) -->
+      <button class="icon-btn" id="btnMessages" onclick="App.openDirectChat('usr-dan-002', 'Daniel Barroso')" title="Mensagens Diretas" aria-label="Mensagens Diretas">
+        <i data-lucide="message-square" class="icon-md"></i>
+      </button>
+
+      <!-- Botão de Entrar (Visitante) -->
+      <button class="btn btn-primary" id="btnAuthHeader" onclick="App.openAuthModal('login')">
+        Entrar
+      </button>
+
+      <!-- Avatar do Usuário Autenticado -->
+      <div class="user-profile-btn" style="position: relative;">
+        <button class="user-avatar-btn" id="userProfileMenuBtn" style="display: none;" onclick="App.toggleUserMenu()" aria-label="Menu do Usuário">
+          <img id="headerUserAvatar" src="" alt="Avatar do Usuário" />
+          <i data-lucide="chevron-down" class="icon-xs" style="color: #5f5f5f;"></i>
+        </button>
+
+        <!-- Menu Dropdown do Usuário -->
+        <div class="dropdown-menu" id="userDropdownMenu">
+          <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color);">
+            <div style="font-weight: 700; font-size: 1rem;" id="dropdownUserName">Usuário</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="dropdownUserEmail">email@stylety.local</div>
+          </div>
+          <button class="dropdown-item" onclick="App.openUserProfile(App.state.currentUser.id)">
+            <i data-lucide="user" class="icon-sm"></i> Meu Perfil
+          </button>
+          <button class="dropdown-item" onclick="App.openCreatePinModal()">
+            <i data-lucide="plus-circle" class="icon-sm"></i> Criar Pin
+          </button>
+          <button class="dropdown-item" onclick="App.openCreateBoardModal()">
+            <i data-lucide="folder-plus" class="icon-sm"></i> Criar Pasta
+          </button>
+          <button class="dropdown-item" onclick="App.openLGPDModal()">
+            <i data-lucide="shield-check" class="icon-sm"></i> Privacidade & LGPD
+          </button>
+          <button class="dropdown-item" onclick="App.openModerationPanel()" id="menuModItem">
+            <i data-lucide="shield" class="icon-sm"></i> Painel de Moderação
+          </button>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item" style="color: #dc3545;" onclick="App.logout()">
+            <i data-lucide="log-out" class="icon-sm"></i> Sair
+          </button>
+        </div>
+      </div>
+
+      <!-- Dropdown Notificações -->
+      <div class="dropdown-menu" id="notifDropdownMenu" style="width: 340px; right: 60px;">
+        <div style="padding: 12px 16px; font-weight: 700; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="bell" class="icon-sm"></i> Atualizações
+          </span>
+          <button style="background: none; border: none; font-size: 0.8rem; font-weight: 600; color: var(--primary); cursor: pointer;" onclick="API.markAllNotificationsRead().then(() => App.loadNotifications())">Marcar lidas</button>
+        </div>
+        <div id="notifList" style="max-height: 340px; overflow-y: auto;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner de Menor de Idade RNE001 -->
+  <div class="info-banner" id="minorNoticeBanner" style="display: none; background: #fff8e6; color: #8a6d1c;">
+    <span style="display: flex; align-items: center; gap: 8px;">
+      <i data-lucide="lock" class="icon-sm"></i>
+      <span><strong>Proteção ao Menor (RNE001):</strong> Sua conta possui perfil privado e restrições de contato ativadas automaticamente.</span>
+    </span>
+  </div>
+
+  <!-- Banner de Visitante Não Autenticado -->
+  <div class="info-banner" id="guestNoticeBanner" style="background: #f0f7ff; color: #0c4a6e; display: none;">
+    <span style="display: flex; align-items: center; gap: 8px;">
+      <i data-lucide="sparkles" class="icon-sm"></i>
+      <span><strong>Explore o Stylety:</strong> <a href="#" onclick="App.openAuthModal('register')" style="color: var(--primary); font-weight: 700; text-decoration: underline;">Cadastre-se</a> para salvar suas ideias favoritas, criar pastas e conversar!</span>
+    </span>
+  </div>
+
+  <!-- Barra de Tópicos e Categorias do Feed (RF005) -->
+  <nav class="topics-bar" aria-label="Tópicos de Interesse">
+    <button class="topic-pill active" data-topic="Tudo" onclick="App.loadFeed('Tudo')">Tudo</button>
+    <button class="topic-pill" data-topic="Videogames" onclick="App.loadFeed('Videogames')">Videogames</button>
+    <button class="topic-pill" data-topic="Hambúrgueres" onclick="App.loadFeed('Hambúrgueres')">Hambúrgueres</button>
+    <button class="topic-pill" data-topic="Natureza" onclick="App.loadFeed('Natureza')">Natureza</button>
+    <button class="topic-pill" data-topic="Mulheres" onclick="App.loadFeed('Mulheres')">Mulheres</button>
+    <button class="topic-pill" data-topic="Vôlei" onclick="App.loadFeed('Vôlei')">Vôlei</button>
+    <button class="topic-pill" data-topic="Motos" onclick="App.loadFeed('Motos')">Motos</button>
+    <button class="topic-pill" data-topic="Academia" onclick="App.loadFeed('Academia')">Academia</button>
+    <button class="topic-pill" data-topic="Maconha" onclick="App.loadFeed('Maconha')">Maconha</button>
+    <button class="topic-pill" data-topic="Design" onclick="App.loadFeed('Design')">Design</button>
+    <button class="topic-pill" data-topic="Viagens" onclick="App.loadFeed('Viagens')">Viagens</button>
+  </nav>
+
+  <!-- Feed Visual Principal Masonry (RF002, RF005, RNF001, RNF004) -->
+  <main class="main-container" role="main">
+    <div class="masonry-grid" id="masonryFeed" aria-live="polite"></div>
+  </main>
+
+  <!-- Botão Flutuante de Debug (Ícone Inseto) -->
+  <button class="floating-debug-btn" onclick="App.openDebugModal()" title="Painel de Testes & Debug (IFPA)" aria-label="Abrir Painel de Debug">
+    <i data-lucide="bug" class="icon-md"></i>
+  </button>
+
+  <!-- MODAL: Debug & Alternância de Contas IFPA -->
+  <div class="modal-backdrop" id="debugModal" role="dialog" aria-modal="true" aria-label="Painel de Debug">
+    <div class="modal-content" style="max-width: 520px; padding: 24px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <i data-lucide="bug" style="width: 28px; height: 28px; color: var(--primary);"></i>
+        <div>
+          <h2 style="font-size: 1.3rem; font-weight: 700;">Painel de Debug & Teste IFPA</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Alterne entre os criadores e veja suas postagens temáticas:</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; max-height: 420px; overflow-y: auto;">
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.logout(); App.closeAllModals();">
+          <i data-lucide="user-x" class="icon-sm"></i> Modo Visitante (Não Autenticado)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('daniel@stylety.local'); App.closeAllModals();">
+          <i data-lucide="user" class="icon-sm"></i> Daniel Barroso (🎮 Videogames)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('debora@stylety.local'); App.closeAllModals();">
+          <i data-lucide="briefcase" class="icon-sm"></i> Débora Vitória (🍔 Hambúrgueres)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('wagner@stylety.local'); App.closeAllModals();">
+          <i data-lucide="user-check" class="icon-sm"></i> Wagner Leandro (🌿 Natureza)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('ruan@stylety.local'); App.closeAllModals();">
+          <i data-lucide="user" class="icon-sm"></i> Ruan Samuel (👩 Mulheres & Moda)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('thiago@stylety.local'); App.closeAllModals();">
+          <i data-lucide="user" class="icon-sm"></i> Thiago Willames (🏐 Vôlei)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('emanuel@stylety.local'); App.closeAllModals();">
+          <i data-lucide="user" class="icon-sm"></i> Emanuel Gomes (🏍️ Motos)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('pedro@stylety.local'); App.closeAllModals();">
+          <i data-lucide="dumbbell" class="icon-sm"></i> Pedro Henrique (🏋️ Academia & Fitness)
+        </button>
+        <button class="btn btn-secondary" style="justify-content: flex-start;" onclick="App.quickLoginAs('kamilla@stylety.local'); App.closeAllModals();">
+          <i data-lucide="sparkles" class="icon-sm"></i> Kamilla Santos (🌿 Maconha & Cultura Canábica)
+        </button>
+        <button class="btn btn-primary" style="justify-content: flex-start;" onclick="App.quickLoginAs('moderador@stylety.local', 'admin123'); App.closeAllModals();">
+          <i data-lucide="shield-alert" class="icon-sm"></i> Moderador Geral (Painel Moderação)
+        </button>
+      </div>
+
+      <div style="background: var(--bg-subtle); padding: 12px; border-radius: var(--border-radius-sm); font-size: 0.8rem; color: var(--text-muted);">
+        <div><strong>Status da API:</strong> <span id="debugApiStatus">Online (localhost:3000)</span></div>
+        <div><strong>Acessibilidade:</strong> WCAG 2.1 AA Ativo</div>
+        <div><strong>Privacidade:</strong> LGPD / GDPR Ativo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalhes do Pin (RF002, RF006, RF008, RNE002, RNE004) -->
+  <div class="modal-backdrop" id="pinDetailModal" role="dialog" aria-modal="true" aria-label="Detalhes do Pin">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div id="pinDetailModalContent"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Criar Novo Pin (RF002) -->
+  <div class="modal-backdrop" id="createPinModal" role="dialog" aria-modal="true" aria-label="Criar Pin">
+    <div class="modal-content" style="max-width: 650px; padding: 28px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <h2 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="plus-circle" class="icon-md"></i> Criar Pin
+      </h2>
+      <form onsubmit="App.handleCreatePinSubmit(event)">
+        <div class="form-group">
+          <label><i data-lucide="upload" class="icon-sm"></i> Escolha um arquivo ou arraste e solte:</label>
+          <input type="file" id="createPinFileInput" accept="image/*,video/*" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label><i data-lucide="link" class="icon-sm"></i> Ou insira a URL da imagem/vídeo:</label>
+          <input type="url" id="createPinUrlInput" placeholder="https://exemplo.com/imagem.jpg" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label><i data-lucide="type" class="icon-sm"></i> Título *:</label>
+          <input type="text" id="createPinTitulo" required placeholder="Adicione seu título" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label><i data-lucide="align-left" class="icon-sm"></i> Descrição:</label>
+          <textarea id="createPinDescricao" rows="3" placeholder="Adicione uma descrição detalhada" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label><i data-lucide="eye" class="icon-sm"></i> Texto alternativo (Acessibilidade leitores de tela - RNF004):</label>
+          <input type="text" id="createPinAltText" placeholder="Explique o que as pessoas veem no Pin" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label><i data-lucide="external-link" class="icon-sm"></i> Link de destino (RNE004):</label>
+          <input type="url" id="createPinLinkDestino" placeholder="https://seusite.com" class="form-control" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label><i data-lucide="tag" class="icon-sm"></i> Categoria:</label>
+            <select id="createPinCategoria" class="form-control">
+              <option value="Design">Design</option>
+              <option value="Fotografia">Fotografia</option>
+              <option value="Arquitetura">Arquitetura</option>
+              <option value="Gastronomia">Gastronomia</option>
+              <option value="Viagens">Viagens</option>
+              <option value="Tecnologia">Tecnologia</option>
+              <option value="DIY">DIY</option>
+              <option value="Moda">Moda</option>
+              <option value="Geral">Geral</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i data-lucide="folder" class="icon-sm"></i> Salvar na pasta:</label>
+            <select id="createPinBoardSelect" class="form-control"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i data-lucide="hash" class="icon-sm"></i> Tags marcadas:</label>
+          <input type="text" id="createPinTags" placeholder="estilo, decoracao, ideias" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+          Publicar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Salvar Pin em Pasta (RF003, RF006) -->
+  <div class="modal-backdrop" id="savePinModal" role="dialog" aria-modal="true" aria-label="Salvar na Pasta">
+    <div class="modal-content" style="max-width: 480px; padding: 24px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="folder" class="icon-md"></i> Salvar em Pasta
+      </h2>
+      <div id="saveBoardsList" style="max-height: 280px; overflow-y: auto; margin-bottom: 16px;"></div>
+      <button class="btn btn-secondary" id="btnCreateBoardInSave" style="width: 100%;">
+        <i data-lucide="folder-plus" class="icon-sm"></i> Criar pasta
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: Stylety Lens (Busca Visual RF004) -->
+  <div class="modal-backdrop" id="lensModal" role="dialog" aria-modal="true" aria-label="Stylety Lens">
+    <div class="modal-content" style="max-width: 840px; padding: 24px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <i data-lucide="camera" style="width: 32px; height: 32px; color: var(--primary);"></i>
+        <div>
+          <h2 style="font-size: 1.4rem; font-weight: 700;">Stylety Lens (Busca Visual)</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Encontre ideias visualmente semelhantes.</p>
+        </div>
+      </div>
+
+      <div class="form-group" style="background: var(--bg-subtle); padding: 24px; border-radius: var(--border-radius-lg); text-align: center;">
+        <label style="cursor: pointer; display: block;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <i data-lucide="upload-cloud" class="icon-lg" style="color: var(--primary);"></i>
+            <strong>Arraste ou clique para carregar uma imagem</strong>
+          </div>
+          <input type="file" accept="image/*" style="display: none;" onchange="App.handleLensUpload(event)" />
+        </label>
+      </div>
+
+      <div id="lensPreviewContainer" style="display: none; text-align: center; margin: 12px 0;">
+        <span style="font-size: 0.85rem; font-weight: 600;">Imagem Selecionada:</span>
+        <img id="lensPreviewImg" style="max-height: 160px; border-radius: 8px; margin-top: 6px; display: inline-block;" />
+      </div>
+
+      <h3 style="font-size: 1.1rem; font-weight: 700; margin: 16px 0 10px 0; display: flex; align-items: center; gap: 6px;">
+        <i data-lucide="sparkles" class="icon-sm"></i> Resultados Visuais
+      </h3>
+      <div class="masonry-grid" id="lensResultsGrid" style="max-height: 400px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Visualização de Perfil de Usuário (RF001, RF007) -->
+  <div class="modal-backdrop" id="profileViewModal" role="dialog" aria-modal="true" aria-label="Perfil do Usuário">
+    <div class="modal-content" style="padding: 28px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div id="profileViewContent"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detalhes de Pasta / Board (RF003, RNE002) -->
+  <div class="modal-backdrop" id="boardViewModal" role="dialog" aria-modal="true" aria-label="Detalhes da Pasta">
+    <div class="modal-content" style="padding: 28px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div id="boardViewContent"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Painel Administrativo de Moderação (RF008, RNE003, RNF006) -->
+  <div class="modal-backdrop" id="moderationModal" role="dialog" aria-modal="true" aria-label="Painel de Moderação">
+    <div class="modal-content" style="padding: 28px; max-width: 900px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="shield" class="icon-md"></i> Painel de Moderação (RF008)
+          </h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Revisão de denúncias e violações (SLA 48h - RNE003).</p>
+        </div>
+        <button class="btn btn-secondary" onclick="App.handleCreateBackup()" title="Executar Backup (RNF006)">
+          <i data-lucide="database" class="icon-sm"></i> Backup Banco
+        </button>
+      </div>
+
+      <!-- Estatísticas -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+        <div style="background: #f7f7f7; padding: 14px; border-radius: var(--border-radius-md); text-align: center;">
+          <div style="font-size: 1.8rem; font-weight: 700; color: #e60023;" id="modStatPendentes">0</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <i data-lucide="clock" class="icon-sm"></i> Pendentes
+          </div>
+        </div>
+        <div style="background: #f7f7f7; padding: 14px; border-radius: var(--border-radius-md); text-align: center;">
+          <div style="font-size: 1.8rem; font-weight: 700; color: #28a745;" id="modStatAnalisadas">0</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <i data-lucide="check-circle" class="icon-sm"></i> Analisadas
+          </div>
+        </div>
+        <div style="background: #f7f7f7; padding: 14px; border-radius: var(--border-radius-md); text-align: center;">
+          <div style="font-size: 1.8rem; font-weight: 700;" id="modStatTotal">0</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <i data-lucide="list" class="icon-sm"></i> Total
+          </div>
+        </div>
+      </div>
+
+      <div id="moderationReportsList" style="max-height: 480px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Denúncia de Conteúdo (RF008, RNE003) -->
+  <div class="modal-backdrop" id="reportModal" role="dialog" aria-modal="true" aria-label="Denunciar Conteúdo">
+    <div class="modal-content" style="max-width: 480px; padding: 24px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+        <i data-lucide="flag" class="icon-md" style="color: #dc3545;"></i> Denunciar Conteúdo (RF008)
+      </h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Sua denúncia será analisada em até 48 horas (RNE003).</p>
+      
+      <form onsubmit="App.handleSendReport(event)">
+        <input type="hidden" id="reportTipoAlvo" />
+        <input type="hidden" id="reportAlvoId" />
+        <div class="form-group">
+          <label>Motivo da denúncia *:</label>
+          <select id="reportMotivo" class="form-control" required>
+            <option value="Conteúdo Impróprio ou Adulto">Conteúdo Impróprio ou Adulto</option>
+            <option value="Violação de Direitos Autorais">Violação de Direitos Autorais</option>
+            <option value="Spam ou Fraude">Spam ou Fraude</option>
+            <option value="Assédio ou Discurso de Ódio">Assédio ou Discurso de Ódio</option>
+            <option value="Desinformação Prejudicial">Desinformação Prejudicial</option>
+            <option value="Outro motivo">Outro motivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Detalhes adicionais (opcional):</label>
+          <textarea id="reportDetalhes" rows="3" placeholder="Descreva o motivo da denúncia..." class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger" style="width: 100%;">
+          Enviar Denúncia
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: LGPD & Privacidade (RNF003, RNE004) -->
+  <div class="modal-backdrop" id="lgpdModal" role="dialog" aria-modal="true" aria-label="Privacidade e LGPD">
+    <div class="modal-content" style="max-width: 600px; padding: 28px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <i data-lucide="shield-check" style="width: 32px; height: 32px; color: var(--primary);"></i>
+        <div>
+          <h2 style="font-size: 1.4rem; font-weight: 700;">Privacidade e LGPD</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</p>
+        </div>
+      </div>
+
+      <div style="background: var(--bg-subtle); padding: 16px; border-radius: var(--border-radius-md); margin-bottom: 16px;">
+        <h4 style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="download" class="icon-sm"></i> Exportação de Dados (Portabilidade)
+        </h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Baixe uma cópia de todos os seus dados cadastrais, ideias salvas e histórico.</p>
+        <button class="btn btn-primary" onclick="App.exportMyData()">
+          <i data-lucide="file-text" class="icon-sm"></i> Exportar Dados (JSON)
+        </button>
+      </div>
+
+      <div style="background: var(--bg-subtle); padding: 16px; border-radius: var(--border-radius-md); margin-bottom: 16px;">
+        <h4 style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="key" class="icon-sm"></i> Autenticação de Dois Fatores (2FA - RNF003)
+        </h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Segurança adicional no acesso à sua conta.</p>
+        <button class="btn btn-secondary" onclick="API.toggle2FA(true).then(r => App.showToast(r.instructions || r.message))">
+          <i data-lucide="lock" class="icon-sm"></i> Ativar 2FA
+        </button>
+      </div>
+
+      <div style="background: #fff3cd; border: 1px solid #ffeeba; padding: 16px; border-radius: var(--border-radius-md);">
+        <h4 style="font-weight: 700; color: #856404; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="alert-triangle" class="icon-sm"></i> Exclusão de Conta (RNE004)
+        </h4>
+        <p style="font-size: 0.85rem; color: #856404; margin-bottom: 10px;">Seus dados pessoais serão removidos e anonimizados em até 30 dias.</p>
+        <button class="btn btn-danger" onclick="App.requestAccountDeletion()">
+          <i data-lucide="trash-2" class="icon-sm"></i> Solicitar Exclusão (30 dias)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Autenticação (Login / Cadastro / Social Login RF001, RNE001) -->
+  <div class="modal-backdrop" id="authModal" role="dialog" aria-modal="true" aria-label="Autenticação">
+    <div class="modal-content" style="max-width: 440px; padding: 32px;">
+      <button class="modal-close-btn" onclick="App.closeAllModals()" aria-label="Fechar">
+        <i data-lucide="x" class="icon-md"></i>
+      </button>
+      
+      <div style="text-align: center; margin-bottom: 24px;">
+        <img src="/img/logo.png" style="width: 54px; height: 54px; border-radius: 50%; margin-bottom: 8px;" />
+        <h2 style="font-size: 1.6rem; font-weight: 700;">Bem-vindo(a) ao Stylety</h2>
+        <p style="font-size: 0.9rem; color: var(--text-muted);">Encontre e organize novas ideias para o seu estilo</p>
+      </div>
+
+      <!-- Abas Login / Cadastro -->
+      <div style="display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 20px;">
+        <button id="authTabLogin" class="nav-btn active" style="flex: 1; border-radius: 0; justify-content: center;" onclick="App.switchAuthTab('login')">
+          Entrar
+        </button>
+        <button id="authTabRegister" class="nav-btn" style="flex: 1; border-radius: 0; justify-content: center;" onclick="App.switchAuthTab('register')">
+          Cadastrar-se
+        </button>
+      </div>
+
+      <!-- Provedores de Login Social (RF001) -->
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+        <button class="btn btn-secondary" onclick="App.handleSocialLogin('Google')" style="border: 1px solid var(--border-color);">
+          <i data-lucide="globe" class="icon-sm" style="color: #ea4335;"></i> Continuar com Google
+        </button>
+        <button class="btn btn-secondary" onclick="App.handleSocialLogin('Facebook')" style="border: 1px solid var(--border-color);">
+          <i data-lucide="share-2" class="icon-sm" style="color: #1877f2;"></i> Continuar com Facebook
+        </button>
+        <button class="btn btn-secondary" onclick="App.handleSocialLogin('Apple')" style="border: 1px solid var(--border-color);">
+          <i data-lucide="smartphone" class="icon-sm"></i> Continuar com Apple
+        </button>
+      </div>
+
+      <div style="text-align: center; color: var(--text-subtle); font-size: 0.8rem; margin-bottom: 16px; position: relative;">
+        <span>OU UTILIZE SEU E-MAIL</span>
+      </div>
+
+      <!-- Formulário de Login -->
+      <div id="loginFormContainer">
+        <form onsubmit="App.handleLoginSubmit(event)">
+          <div class="form-group">
+            <label><i data-lucide="mail" class="icon-sm"></i> E-mail:</label>
+            <input type="email" id="loginEmail" required placeholder="seuemail@exemplo.com" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><i data-lucide="lock" class="icon-sm"></i> Senha:</label>
+            <input type="password" id="loginSenha" required placeholder="••••••••" class="form-control" />
+          </div>
+          <div class="form-group" id="twoFactorContainer" style="display: none;">
+            <label style="color: var(--primary);"><i data-lucide="key" class="icon-sm"></i> Código 2FA:</label>
+            <input type="text" id="login2FACode" placeholder="Digite o código de 6 dígitos" class="form-control" />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+            Entrar
+          </button>
+        </form>
+      </div>
+
+      <!-- Formulário de Cadastro com Validação de Idade (RNE001) -->
+      <div id="registerFormContainer" style="display: none;">
+        <form onsubmit="App.handleRegisterSubmit(event)">
+          <div class="form-group">
+            <label><i data-lucide="user" class="icon-sm"></i> Nome Completo *:</label>
+            <input type="text" id="regNome" required placeholder="Seu nome" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><i data-lucide="mail" class="icon-sm"></i> E-mail *:</label>
+            <input type="email" id="regEmail" required placeholder="seuemail@exemplo.com" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><i data-lucide="lock" class="icon-sm"></i> Senha *:</label>
+            <input type="password" id="regSenha" required placeholder="Mínimo 6 caracteres" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label><i data-lucide="calendar" class="icon-sm"></i> Data de Nascimento (Mínimo 13 anos - RNE001) *:</label>
+            <input type="date" id="regDataNascimento" required class="form-control" />
+            <small style="font-size: 0.75rem; color: var(--text-muted);">Exigido no mínimo 13 anos. Contas de 13 a 18 anos são privadas por padrão (RNE001).</small>
+          </div>
+          <div class="form-group">
+            <label><i data-lucide="briefcase" class="icon-sm"></i> Tipo de Conta:</label>
+            <select id="regTipoConta" class="form-control">
+              <option value="pessoal">Pessoal</option>
+              <option value="business">Business / Criador Comercial</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+            Criar Minha Conta
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Drawer Flutuante (Mensagens Diretas Internas RF006) -->
+  <div class="chat-drawer" id="chatDrawer" role="region" aria-label="Mensagens Diretas">
+    <div class="chat-header">
+      <span style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;" id="chatHeaderTitle">
+        <i data-lucide="message-square" class="icon-sm"></i> Chat
+      </span>
+      <button style="background: none; border: none; cursor: pointer; display: flex; align-items: center;" onclick="document.getElementById('chatDrawer').classList.remove('open')">
+        <i data-lucide="x" class="icon-sm"></i>
+      </button>
+    </div>
+    <div class="chat-messages" id="chatMessagesContainer"></div>
+    <form onsubmit="App.handleSendDirectMessage(event)" style="padding: 10px; background: #f7f7f7; display: flex; gap: 6px;">
+      <input type="text" id="chatTextInput" placeholder="Enviar uma mensagem..." class="form-control" style="border-radius: var(--border-radius-full);" />
+      <button type="submit" class="btn btn-primary" style="padding: 6px 14px;">
+        <i data-lucide="send" class="icon-sm"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- Container de Toasts -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
+
+  <!-- Scripts -->
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

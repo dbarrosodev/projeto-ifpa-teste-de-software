@@ -1,0 +1,50 @@
+# Dependências do Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Banco de dados local SQLite e backups gerados
+data/
+backups/
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Arquivos temporários de upload e logs
+public/uploads/temp/
+logs/
+*.log
+
+# Arquivos temporários de extração
+docx_media/
+documento_extraido.txt
+
+# Variáveis de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Arquivos de IDEs e editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Cobertura de testes e relatórios
+coverage/
+.nyc_output/

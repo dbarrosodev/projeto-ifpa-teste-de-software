@@ -1,0 +1,38 @@
+{
+  "name": "projeto-ifpa-teste-de-software",
+  "version": "1.0.0",
+  "description": "Plataforma de Descoberta Visual (Stylety) - IFPA Teste de Software",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "pinterest",
+    "ifpa",
+    "teste-de-software",
+    "fullstack",
+    "express",
+    "sqlite"
+  ],
+  "author": "Daniel Barroso Siqueira, Débora Vitória da Cruz Garcia, Wagner Leandro Cunha dos Santos",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^11.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "lucide": "^1.33.0",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.5",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.5"
+  }
+}
