@@ -1,6 +1,6 @@
 # 📌 Stylety – Plataforma de Descoberta Visual (IFPA)
 
-> Um clone completo, moderno e responsivo do **Pinterest**, batizado de **Stylety**, desenvolvido estritamente com base no Documento de Requisitos de Teste de Software do IFPA.
+> Um clone completo, moderno e responsivo do **Pinterest**, batizado de **Stylety**, desenvolvido estritamente com base no Documento de Requisitos da disciplina de Teste de Software do IFPA.
 
 ---
 
@@ -69,34 +69,15 @@ Agora, abra o seu navegador de internet (Google Chrome, Firefox, Edge, etc.) e a
 
 👉 **[http://localhost:3000](http://localhost:3000)**
 
-Pronto! A aplicação estará pronta para uso! 🎉
+Pronto! A aplicação estará aberta e pronta para uso! 🎉
 
 ---
 
-## 🧪 Como Executar os Testes Automatizados
+## 🐞 Painel de Debug & Teste Manual (1 Clique)
 
-O projeto conta com uma suíte completa de **27 testes automatizados de ponta a ponta** (utilizando Vitest e Supertest).
+Para facilitar a execução dos testes manuais de cada requisito sem precisar cadastrar usuários ou preencher formulários repetidamente, o sistema conta com um **Botão Flutuante de Inseto (Debug)** no canto inferior esquerdo da tela:
 
-Para rodar todos os testes e verificar a integridade do software, abra o terminal e execute:
-
-```bash
-npm test
-```
-
-Resultado esperado:
-```text
-✓ tests/system.test.mjs (27 tests)
-Test Files  1 passed (1)
-Tests       27 passed (27)
-```
-
----
-
-## 🐞 Painel de Debug & Teste Rápido (1 Clique)
-
-Para facilitar a avaliação e teste das funcionalidades sem precisar preencher formulários manualmente, o sistema conta com um **Botão Flutuante de Inseto (Debug)** no canto inferior esquerdo da tela:
-
-Basta clicar no ícone de inseto para alternar instantaneamente entre os perfis:
+Basta clicar no ícone de inseto para alternar instantaneamente entre os perfis e testar as regras de negócio:
 
 | Criador | E-mail de Teste | Tema / Foco de Conteúdo |
 | :--- | :--- | :--- |
@@ -111,38 +92,45 @@ Basta clicar no ícone de inseto para alternar instantaneamente entre os perfis:
 | **🛡️ Moderador Geral** | `moderador@stylety.local` | Painel de Moderação e SLA 48h |
 | **👤 Modo Visitante** | *(Desconectado)* | Navegação pública com curadoria |
 
+> *Senha padrão de todos os usuários de teste:* `senha123` (ou `admin123` para o Moderador).
+
 ---
 
-## ✨ Principais Funcionalidades do Sistema
+## 📋 Guia de Roteiro para Testes Manuais (Requisitos do Documento)
 
-### 🎨 1. Interface Idêntica ao Pinterest Original
-- **Grade Masonry Fluida:** Layout adaptativo de colunas com proporção natural das fotos.
-- **Hover Scrim Dinâmico:** Botão vermelho **"Salvar"**, link do site e botões translúcidos de ação rápida.
-- **Barra de Tópicos do Topo:** Pílulas de categorias com rolagem suave (*Videogames, Hambúrgueres, Natureza, Mulheres, Vôlei, Motos, Academia, Maconha, Design, Viagens*).
-- **Pinterest Lens (Busca Visual por Câmera):** Envia uma imagem para encontrar instantaneamente ideias similares por inteligência de atributos visuais.
+### RF001 & RNE001 – Gestão de Acesso e Idade Mínima
+- **Teste 1 (Menores de 13 anos):** Tente cadastrar um usuário com data de nascimento de menos de 13 anos. O sistema bloqueia com mensagem de erro explicativa.
+- **Teste 2 (Adolescentes 13-17 anos):** Cadastre uma data com idade entre 13 e 17 anos. A conta é criada com perfil privado ativado por padrão.
+- **Teste 3 (Login Social Simulado):** Na tela de login, clique em Google, Facebook ou Apple para autenticar instantaneamente.
 
-### 💬 2. Comentários com Respostas Encadeadas (Threads)
-- Comente em qualquer ideia e responda diretamente a outros usuários com o botão **Responder**.
-- Notificações automáticas ao autor do comentário original.
+### RF002 & RNE002 – Criação e Exclusão Definitiva de Pins
+- **Teste 4 (Criar Ideia):** Clique no menu **"Criar" > "Criar Pin"**, anexe uma imagem/vídeo, digite título, descrição, texto alternativo e categoria.
+- **Teste 5 (Excluir Pin):** Abra um Pin de sua autoria e clique no botão vermelho **"Excluir"**. O item é removido definitivamente do banco de dados.
 
-### 📁 3. Gestão de Pastas (Públicas e Secretas - RNE002)
-- Crie pastas públicas ou marque como **Secreta** para que apenas você possa visualizar.
-- Convide colaboradores para montar pastas em conjunto.
+### RF003 & RNE002 – Pastas e Pastas Secretas
+- **Teste 6 (Criar Pasta Secreta):** Crie uma nova pasta marcando a opção **"Manter esta pasta secreta"**.
+- **Teste 7 (Privacidade):** Faça logout ou entre em outra conta; a pasta secreta não aparecerá no perfil público.
 
-### 🛡️ 4. Moderação Preventiva e SLA de 48 Horas (RF008 & RNE003)
-- Sistema de denúncias de conteúdo inadequado.
-- **Ocultação Preventiva Automática:** Pins com 2 ou mais denúncias são ocultados preventivamente do feed público até análise.
-- Painel Administrativo do Moderador com cálculo do SLA de 48 horas em tempo real.
+### RF004 – Pesquisa Textual e Pinterest Lens
+- **Teste 8 (Busca Textual):** Digite qualquer termo na barra de busca (ex: `Hambúrguer`, `Vôlei`, `Motos`) e veja os resultados filtrados.
+- **Teste 9 (Pinterest Lens):** Clique no ícone de câmera na barra de busca, envie uma foto ou use a webcam para buscar ideias visualmente semelhantes.
 
-### 🔒 5. LGPD, Segurança e Idade Mínima (RF001, RNE001, RNF003 & RNE004)
-- **Validação de Idade (RNE001):** Bloqueio estrito para menores de 13 anos. Contas de 13 a 17 anos são criadas automaticamente como privadas.
-- **Portabilidade LGPD (RNF003):** Exportação completa de todos os dados do usuário em formato JSON legível.
-- **Direito ao Esquecimento (RNE004):** Solicitação de exclusão definitiva com carência de 30 dias.
-- **Backup Automático (RNF006):** Rotinas de backup do banco de dados SQLite.
+### RF005 – Feed Personalizado e Tópicos
+- **Teste 10 (Pílulas de Tópicos):** Clique nas categorias do topo (*Videogames, Hambúrgueres, Natureza, Mulheres, Vôlei, Motos, Academia, Maconha*) para filtrar o feed instantaneamente.
 
-### ♿ 6. Acessibilidade (WCAG 2.1 AA - RNF004)
-- Suporte a textos alternativos em todas as mídias.
-- Botão de alternância de **Alto Contraste** e atalhos rápidos de teclado (`Alt + H` para Início, `Alt + S` para Busca, `Alt + C` para Criar, `Alt + M` para Moderação).
+### RF006 & RF007 – Curtidas, Comentários e Respostas (Threads)
+- **Teste 11 (Curtir):** Clique no coração de qualquer Pin no feed ou no modal de detalhes.
+- **Teste 12 (Comentar e Responder):** Abra um Pin, envie um comentário ou clique em **"Responder"** em um comentário existente para criar uma resposta encadeada.
+
+### RF008 & RNE003 – Moderação Preventiva e SLA 48h
+- **Teste 13 (Denunciar Pin):** Abra um Pin e clique na bandeira de denúncia.
+- **Teste 14 (Ocultação Preventiva):** Denuncie o mesmo Pin 2 vezes com usuários diferentes; o Pin será ocultado preventivamente do feed público.
+- **Teste 15 (Painel do Moderador):** Entre como *Moderador Geral* pelo painel de debug, clique em seu perfil e acesse **"Painel de Moderação"** para visualizar denúncias e o SLA de 48h.
+
+### RNF003, RNE004 & RNF006 – LGPD e Acessibilidade
+- **Teste 16 (Exportar Dados LGPD):** No menu do perfil, clique em **"Exportar Dados (LGPD)"** para baixar um arquivo JSON com todas as suas informações.
+- **Teste 17 (Excluir Conta 30 Dias):** Solicite a exclusão da conta para verificar o agendamento de 30 dias de carência.
+- **Teste 18 (Alto Contraste):** Clique no botão de acessibilidade no rodapé/menu para ativar o modo de Alto Contraste (WCAG 2.1 AA).
 
 ---
 
@@ -180,8 +168,6 @@ projeto-ifpa-teste-de-software/
 │   ├── services/
 │   │   └── seed.js             # População inicial com criadores e pins
 │   └── app.js                  # Inicialização do Express
-├── tests/
-│   └── system.test.mjs         # 27 testes automatizados cobrindo todos os requisitos
 ├── package.json                # Dependências e scripts do projeto
 ├── server.js                   # Ponto de entrada do servidor
 └── README.md                   # Documentação do projeto
@@ -197,7 +183,6 @@ projeto-ifpa-teste-de-software/
 - **Ícones:** Lucide Icons (SVG Vetoriais Nativos)
 - **Processamento de Imagem:** Sharp
 - **Autenticação:** JSON Web Tokens (JWT) e Bcrypt.js
-- **Testes Automatizados:** Vitest e Supertest
 - **PWA & Offline:** Service Worker e Web App Manifest
 
 ---
